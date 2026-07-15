@@ -78,7 +78,7 @@
       color: var(--text);
       font-family: Inter, system-ui, sans-serif;
       overflow-x: hidden;
-      transition: background 0.2s ease, color 0.2s ease;
+      transition: background 0.4s ease, color 0.4s ease;
     }
     h1,h2,h3,.display { font-family: Manrope, Inter, system-ui, sans-serif; }
     ::selection { background: rgba(244,184,96,.22); }
@@ -88,7 +88,6 @@
       background: var(--card-bg);
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
-      /* Removed all blur and hardware layers to save VRAM */
     }
     .glass-soft {
       background: var(--card-bg2);
@@ -100,12 +99,27 @@
     .pill { border: 1px solid var(--border); background: var(--bg2); color: var(--text); }
     
     .btn-primary {
+      position: relative;
       background: var(--accent);
       color: #000;
       border: 1px solid transparent;
       box-shadow: 0 4px 15px rgba(244,184,96,.2);
+      z-index: 1;
     }
     html[data-theme="dark"] .btn-primary { color: #000; box-shadow: 0 4px 15px rgba(126,180,255,.2); }
+    
+    /* GPU Accelerated Button Glow */
+    .btn-primary::before {
+      content: ''; position: absolute; inset: 0; border-radius: inherit;
+      box-shadow: 0 0 20px var(--accent); opacity: 0; z-index: -1;
+      transition: opacity 0.4s ease; mix-blend-mode: screen;
+    }
+    .btn-primary:hover::before { opacity: 0.6; animation: pulseGlow 1.5s infinite alternate; }
+    
+    @keyframes pulseGlow {
+      from { transform: scale(1); opacity: 0.4; }
+      to { transform: scale(1.05); opacity: 0.8; }
+    }
     
     .btn-secondary { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); }
     
@@ -123,25 +137,32 @@
       background: var(--accent); border-radius: 99px;
     }
     
-    /* Hardware accelerated reveal only for transform/opacity */
+    /* Hardware accelerated reveal */
     .reveal { 
       opacity: 0; 
-      transform: translateY(15px); 
-      transition: opacity 0.6s ease-out, transform 0.6s ease-out; 
+      transform: translateY(20px) translateZ(0); 
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); 
+      will-change: opacity, transform;
     }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal.visible { opacity: 1; transform: translateY(0) translateZ(0); }
     
     .line { width: 72px; height: 2px; background: var(--accent); opacity: 0.5; border-radius: 2px; }
     
+    /* Upgraded Tag Animations */
     .tag {
       font-size: .75rem; padding: .35rem .7rem; border-radius: 999px; color: var(--muted);
       border: 1px solid var(--border); background: var(--bg);
-      transition: transform 0.2s ease, border-color 0.2s ease;
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), border-color 0.3s ease;
+      will-change: transform;
     }
-    .tag:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .tag:hover { border-color: var(--accent); transform: translateY(-4px) scale(1.05) translateZ(0); }
     
-    .smooth { transition: transform .3s ease, border-color .3s ease; }
-    .glass:hover { border-color: var(--accent); }
+    /* Upgraded Smooth Card Hover */
+    .smooth { 
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease; 
+      will-change: transform; 
+    }
+    .smooth:hover { transform: translateY(-8px) scale(1.02) translateZ(0); border-color: var(--accent); }
     
     /* Background Elements - Hardware accelerated only where needed */
     #bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; z-index: 0; }
@@ -151,37 +172,45 @@
       position: absolute; border-radius: 9999px; opacity: .4; pointer-events: none;
       background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
       animation: floatBlob 20s ease-in-out infinite;
-      transform: translateZ(0); /* Crucial for animating elements */
+      transform: translateZ(0);
+      will-change: transform;
     }
     
-    .theme-toggle { width: 44px; height: 44px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); cursor: pointer; transition: transform 0.2s ease; }
-    .theme-toggle:hover { transform: scale(1.05) rotate(12deg); }
+    .theme-toggle { width: 44px; height: 44px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); cursor: pointer; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); will-change: transform; }
+    .theme-toggle:hover { transform: scale(1.15) rotate(25deg) translateZ(0); }
     
     .star-field { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
-    .star { position: absolute; width: 2px; height: 2px; background: var(--accent); animation: drift var(--dur, 14s) linear infinite; opacity: var(--op, .4); transform: translateZ(0); }
+    .star { position: absolute; width: 2px; height: 2px; background: var(--accent); animation: drift var(--dur, 14s) linear infinite; opacity: var(--op, .4); transform: translateZ(0); will-change: transform; }
     
     .nebula {
       position: absolute; border-radius: 9999px; pointer-events: none; opacity: .15; 
       background: radial-gradient(circle, var(--accent) 0%, transparent 70%);
       animation: floatBlob 28s ease-in-out infinite reverse;
       transform: translateZ(0);
+      will-change: transform;
     }
     
     .orbit-ring {
       position: absolute; border-radius: 9999px; border: 1px solid var(--border); pointer-events: none; 
       animation: spin 50s linear infinite;
       transform: translateZ(0);
+      will-change: transform;
     }
     
     .form-field {
       width: 100%; border-radius: 1rem; border: 1px solid var(--line); background: var(--bg); color: var(--text);
-      padding: .9rem 1rem; outline: none; transition: border-color .2s ease;
+      padding: .9rem 1rem; outline: none; transition: border-color .3s ease, transform .3s ease;
+      will-change: transform;
     }
-    .form-field:focus { border-color: var(--accent); }
+    .form-field:focus { border-color: var(--accent); transform: translateY(-2px) translateZ(0); }
     
+    /* Zero Gravity Hero Card */
     .hero-card {
       border-radius: 2rem; border: 1px solid var(--line); background: var(--bg2);
       min-height: 520px; position: relative; overflow: hidden;
+      animation: zeroGravity 8s ease-in-out infinite;
+      transform-style: preserve-3d;
+      will-change: transform;
     }
     
     /* High Performance Preloader */
@@ -200,6 +229,64 @@
     @keyframes drift { 0% { transform: translate3d(0,0,0); } 50% { transform: translate3d(10px,-10px,0); } 100% { transform: translate3d(0,0,0); } }
     @keyframes floatBlob { 0%,100% { transform: translate3d(0,0,0); } 50% { transform: translate3d(12px,-12px,0); } }
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes zeroGravity { 0%, 100% { transform: translate3d(0,0,0) rotate(0deg); } 50% { transform: translate3d(0,-12px,0) rotate(0.8deg); } }
+
+    /* ---------- PERFORMANCE: paint/layout containment on repeating blocks ---------- */
+    section.section { contain: content; }
+    .glass, .glass-soft { contain: content; }
+
+    /* ---------- Twinkling star field (pure CSS, generated once, no per-frame JS cost) ---------- */
+    .twinkle {
+      position: absolute; border-radius: 9999px; background: var(--particle);
+      animation: twinkle var(--tdur, 4s) ease-in-out infinite; animation-delay: var(--tdelay, 0s);
+      transform: translateZ(0);
+      will-change: opacity;
+    }
+    @keyframes twinkle { 0%, 100% { opacity: var(--tmin, .15); } 50% { opacity: var(--tmax, .9); } }
+
+    /* ---------- Orbiting satellite & planets ---------- */
+    .orbit-deco {
+      position: absolute; top: 50%; right: -60px; width: 260px; height: 260px;
+      transform: translateY(-50%) translateZ(0); pointer-events: none; opacity: .55; z-index: 0;
+      will-change: transform;
+    }
+    .orbit-deco-ring {
+      position: absolute; inset: 0; border-radius: 9999px; border: 1px dashed var(--border);
+    }
+    .orbit-deco-ring::after {
+      content: ''; position: absolute; inset: 34px; border-radius: 9999px; border: 1px solid var(--border); opacity: .6;
+    }
+    .orbit-deco-sat {
+      position: absolute; top: 50%; left: 50%; width: 130px; height: 130px; margin: -65px 0 0 -65px;
+      animation: spin 16s linear infinite; transform: translateZ(0);
+      will-change: transform;
+    }
+    .orbit-deco-sat > span {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      font-size: 1.4rem; filter: drop-shadow(0 0 6px var(--sun)); display: inline-block;
+      animation: spin 16s linear infinite reverse; 
+    }
+    .planet-deco {
+      position: absolute; border-radius: 9999px; pointer-events: none; z-index: 0;
+      background: radial-gradient(circle at 32% 28%, var(--accent), transparent 65%);
+      opacity: .18;
+      animation: spin 120s linear infinite;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+
+    @media (max-width: 768px) {
+      .orbit-deco { display: none; }
+    }
+
+    /* ---------- Respect reduced motion: disable ambient/decorative animation ---------- */
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .floating-orb, .nebula, .orbit-ring, .star, .twinkle, .orbit-deco-sat, .reveal, .hero-card, .planet-deco {
+        animation: none !important; transition: none !important;
+      }
+      .reveal { opacity: 1; transform: none; }
+    }
   </style>
 </head>
 <body class="overflow-hidden">
@@ -247,11 +334,12 @@
         <a class="nav-link" href="#experience">Experience</a>
         <a class="nav-link" href="#projects">Projects</a>
         <a class="nav-link" href="#education">Education</a>
+        <a class="nav-link" href="#certificates">Certificates</a>
         <a class="nav-link" href="#contact">Contact</a>
       </div>
       <div class="flex items-center gap-2">
         <button id="themeToggle" class="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">☾</button>
-        <a href="mailto:devikadhanyakumarmane@gmail.com" class="hidden md:inline-flex btn-primary px-4 py-2 rounded-full text-sm font-semibold hover:scale-105 transition-transform duration-200">Email Me</a>
+        <a href="mailto:devikadhanyakumarmane@gmail.com" class="hidden md:inline-flex btn-primary px-4 py-2 rounded-full text-sm font-semibold hover:-translate-y-1 transition-transform duration-300">Email Me</a>
         <button id="menuBtn" class="md:hidden btn-secondary px-4 py-2 rounded-full text-sm transition-all duration-200">Menu</button>
       </div>
     </nav>
@@ -263,6 +351,7 @@
         <a href="#experience" class="mobile-nav-link hover:text-[color:var(--text)] py-1">Experience</a>
         <a href="#projects" class="mobile-nav-link hover:text-[color:var(--text)] py-1">Projects</a>
         <a href="#education" class="mobile-nav-link hover:text-[color:var(--text)] py-1">Education</a>
+        <a href="#certificates" class="mobile-nav-link hover:text-[color:var(--text)] py-1">Certificates</a>
         <a href="#contact" class="mobile-nav-link hover:text-[color:var(--text)] py-1">Contact</a>
       </div>
     </div>
@@ -284,9 +373,9 @@
               I build dependable backend systems, clean REST APIs, and structured database applications with Java, Spring Boot, Hibernate, JDBC, and MySQL.
             </p>
             <div class="flex flex-wrap gap-3">
-              <a href="#projects" class="btn-primary px-6 py-3 rounded-full font-semibold hover:-translate-y-1 transition-transform">View Projects</a>
-              <a href="#contact" class="btn-secondary px-6 py-3 rounded-full font-semibold hover:-translate-y-1 transition-transform">Contact Me</a>
-              <button id="resumeBtn" class="btn-secondary px-6 py-3 rounded-full font-semibold hover:-translate-y-1 transition-transform">Resume</button>
+              <a href="#projects" class="btn-primary px-6 py-3 rounded-full font-semibold hover:-translate-y-1 transition-transform duration-300">View Projects</a>
+              <a href="#contact" class="btn-secondary px-6 py-3 rounded-full font-semibold hover:-translate-y-1 transition-transform duration-300">Contact Me</a>
+              <button id="resumeBtn" class="btn-secondary px-6 py-3 rounded-full font-semibold hover:-translate-y-1 transition-transform duration-300">Resume</button>
             </div>
             <div class="mt-10 flex flex-wrap gap-3 text-sm text-[color:var(--muted)]">
               <span class="tag">Spring Boot</span>
@@ -343,7 +432,8 @@
       </div>
     </section>
 
-    <section id="about" class="section py-20 sm:py-28">
+    <section id="about" class="section py-20 sm:py-28 relative overflow-hidden">
+      <div class="planet-deco" style="width: 220px; height: 220px; top: -40px; left: -60px;" aria-hidden="true"></div>
       <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 relative">
         <div class="grid lg:grid-cols-2 gap-12 items-start">
           <div class="reveal">
@@ -370,12 +460,12 @@
           <p class="max-w-xl text-[color:var(--muted)]">A focused mix of backend, frontend, database, and workflow tools for full-stack delivery.</p>
         </div>
         <div class="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          <div class="reveal glass rounded-[1.8rem] p-6 smooth hover:-translate-y-1"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Languages</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">Java</span><span class="tag">SQL</span></div></div>
-          <div class="reveal glass rounded-[1.8rem] p-6 smooth hover:-translate-y-1"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Backend</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">Spring Boot</span><span class="tag">Hibernate</span><span class="tag">JDBC</span><span class="tag">REST APIs</span></div></div>
-          <div class="reveal glass rounded-[1.8rem] p-6 smooth hover:-translate-y-1"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Frontend</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span></div></div>
-          <div class="reveal glass rounded-[1.8rem] p-6 smooth hover:-translate-y-1"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Databases</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">MySQL</span><span class="tag">PostgreSQL</span></div></div>
-          <div class="reveal glass rounded-[1.8rem] p-6 smooth hover:-translate-y-1"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Tools</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">GitHub</span><span class="tag">Gradle</span><span class="tag">Linux</span><span class="tag">VS Code</span></div></div>
-          <div class="reveal glass rounded-[1.8rem] p-6 smooth hover:-translate-y-1"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Core Focus</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">APIs</span><span class="tag">Validation</span><span class="tag">ORM</span><span class="tag">Architecture</span></div></div>
+          <div class="reveal glass rounded-[1.8rem] p-6 smooth"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Languages</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">Java</span><span class="tag">SQL</span></div></div>
+          <div class="reveal glass rounded-[1.8rem] p-6 smooth"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Backend</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">Spring Boot</span><span class="tag">Hibernate</span><span class="tag">JDBC</span><span class="tag">REST APIs</span></div></div>
+          <div class="reveal glass rounded-[1.8rem] p-6 smooth"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Frontend</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span></div></div>
+          <div class="reveal glass rounded-[1.8rem] p-6 smooth"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Databases</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">MySQL</span><span class="tag">PostgreSQL</span></div></div>
+          <div class="reveal glass rounded-[1.8rem] p-6 smooth"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Tools</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">GitHub</span><span class="tag">Gradle</span><span class="tag">Linux</span><span class="tag">VS Code</span></div></div>
+          <div class="reveal glass rounded-[1.8rem] p-6 smooth"><div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">Core Focus</div><div class="mt-4 flex flex-wrap gap-2"><span class="tag">APIs</span><span class="tag">Validation</span><span class="tag">ORM</span><span class="tag">Architecture</span></div></div>
         </div>
       </div>
     </section>
@@ -386,11 +476,16 @@
           <div class="section-label">Experience</div>
           <h2 class="section-title mt-3 text-[color:var(--text)]">Practical work, careful execution, real collaboration.</h2>
         </div>
-        <div class="mt-12 grid lg:grid-cols-[.7fr_1.3fr] gap-8 items-start">
-          <div class="reveal glass rounded-[1.8rem] p-6 text-[color:var(--muted)]">
+        <div class="mt-12 grid lg:grid-cols-[.7fr_1.3fr] gap-8 items-start relative">
+          <div class="reveal glass rounded-[1.8rem] p-6 text-[color:var(--muted)] relative overflow-visible">
             <div class="flex items-center gap-3 mb-4"><span class="timeline-dot"></span><div class="font-semibold text-[color:var(--text)]">Machine Learning Intern</div></div>
             <div class="text-sm text-[color:var(--muted2)]">Advansphere · Remote</div>
             <div class="text-sm text-[color:var(--muted2)]">Nov 2024 – Jan 2025</div>
+            <div class="mt-10 hidden sm:block" aria-hidden="true">
+              <div class="orbit-deco-ring" style="position: relative; width: 90px; height: 90px; opacity: .5; margin: 0 auto;">
+                <div class="orbit-deco-sat" style="width: 90px; height: 90px; margin: -45px 0 0 -45px; animation-duration: 10s;"><span style="animation-duration: 10s;">🪐</span></div>
+              </div>
+            </div>
           </div>
           <div class="reveal glass rounded-[1.8rem] p-7 text-[color:var(--muted)] leading-relaxed">
             <ul class="grid gap-3 list-disc pl-5">
@@ -414,32 +509,48 @@
           <p class="max-w-xl text-[color:var(--muted)]">Each project highlights structure, database interaction, validation, and clean user flow.</p>
         </div>
         <div class="mt-10 grid lg:grid-cols-3 gap-5">
-          <article class="reveal glass rounded-[1.8rem] p-6 smooth hover:-translate-y-1 flex flex-col justify-between">
+          <article class="reveal glass rounded-[1.8rem] p-6 smooth flex flex-col justify-between">
             <div>
               <div class="inline-flex pill px-3 py-1 rounded-full text-xs font-semibold mb-4">Spring Boot · Hibernate</div>
               <h3 class="text-2xl font-bold text-[color:var(--text)]">Banking Application</h3>
-              <p class="mt-3 text-[color:var(--muted)] text-sm">A secure backend system for creating accounts, handling deposits and withdrawals, and processing transfers with validation.</p>
+              <p class="mt-3 text-[color:var(--muted)] text-sm leading-relaxed">A secure, transaction-safe backend for a retail banking workflow. Customers can open accounts, view balances, and move money with confidence that every operation is validated end to end.</p>
+              <ul class="mt-4 space-y-2 text-[color:var(--muted)] text-sm">
+                <li class="flex gap-2"><span class="text-[color:var(--accent)]">•</span>Account creation, KYC-style field validation, and role-based access for customers and admins.</li>
+                <li class="flex gap-2"><span class="text-[color:var(--accent)]">•</span>Deposit, withdrawal, and transfer logic wrapped in Hibernate transactions to prevent partial or double updates.</li>
+                <li class="flex gap-2"><span class="text-[color:var(--accent)]">•</span>Custom exception handling and input checks that reject invalid amounts, insufficient balances, and malformed requests before they reach the database.</li>
+              </ul>
             </div>
           </article>
-          <article class="reveal glass rounded-[1.8rem] p-6 smooth hover:-translate-y-1 flex flex-col justify-between">
+          <article class="reveal glass rounded-[1.8rem] p-6 smooth flex flex-col justify-between">
             <div>
               <div class="inline-flex pill px-3 py-1 rounded-full text-xs font-semibold mb-4">Java · JDBC · MySQL</div>
               <h3 class="text-2xl font-bold text-[color:var(--text)]">Exam System</h3>
-              <p class="mt-3 text-[color:var(--muted)] text-sm">A CRUD-based application for student records, exam schedules, subjects, and result processing with a responsive interface.</p>
+              <p class="mt-3 text-[color:var(--muted)] text-sm leading-relaxed">A full CRUD platform built to manage the day-to-day academic workflow of a college, from student onboarding through exam scheduling to final result publication.</p>
+              <ul class="mt-4 space-y-2 text-[color:var(--muted)] text-sm">
+                <li class="flex gap-2"><span class="text-[color:var(--accent)]">•</span>Structured schema for students, subjects, exam timetables, and results with foreign-key integrity enforced at the JDBC layer.</li>
+                <li class="flex gap-2"><span class="text-[color:var(--accent)]">•</span>Search, filter, and update operations built for speed on large record sets, with parameterized queries to prevent SQL injection.</li>
+                <li class="flex gap-2"><span class="text-[color:var(--accent)]">•</span>A responsive interface that lets staff manage schedules and results without touching the database directly.</li>
+              </ul>
             </div>
           </article>
-          <article class="reveal glass rounded-[1.8rem] p-6 smooth hover:-translate-y-1 flex flex-col justify-between">
+          <article class="reveal glass rounded-[1.8rem] p-6 smooth flex flex-col justify-between">
             <div>
               <div class="inline-flex pill px-3 py-1 rounded-full text-xs font-semibold mb-4">Java · PostgreSQL</div>
               <h3 class="text-2xl font-bold text-[color:var(--text)]">Employee Management</h3>
-              <p class="mt-3 text-[color:var(--muted)] text-sm">An ORM-driven system for managing employee records, roles, departments, search, update, and delete operations.</p>
+              <p class="mt-3 text-[color:var(--muted)] text-sm leading-relaxed">An ORM-driven system that gives an organization one clean, reliable place to manage its people: roles, departments, reporting lines, and day-to-day record changes.</p>
+              <ul class="mt-4 space-y-2 text-[color:var(--muted)] text-sm">
+                <li class="flex gap-2"><span class="text-[color:var(--accent)]">•</span>Full lifecycle management for employee records, including create, search, update, and soft-delete flows.</li>
+                <li class="flex gap-2"><span class="text-[color:var(--accent)]">•</span>Department and role mapping modeled with proper relational structure so reporting stays accurate as the org grows.</li>
+                <li class="flex gap-2"><span class="text-[color:var(--accent)]">•</span>ORM-mapped entities that keep the Java model and PostgreSQL schema in sync, reducing manual query maintenance.</li>
+              </ul>
             </div>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="education" class="section py-20 sm:py-28">
+    <section id="education" class="section py-20 sm:py-28 relative overflow-hidden">
+      <div class="planet-deco" style="width: 260px; height: 260px; bottom: -80px; right: -80px;" aria-hidden="true"></div>
       <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 relative">
         <div class="reveal">
           <div class="section-label">Education</div>
@@ -455,6 +566,32 @@
             <div class="text-right">
               <div class="text-xs uppercase tracking-[.24em] text-[color:var(--muted2)]">CGPA</div>
               <div class="mt-1 text-3xl font-extrabold text-[color:var(--text)]">7.4 / 10</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="certificates" class="section py-20 sm:py-28 relative overflow-hidden">
+      <div class="orbit-deco" aria-hidden="true">
+        <div class="orbit-deco-ring"></div>
+        <div class="orbit-deco-sat"><span>🛰️</span></div>
+      </div>
+      <div class="mx-auto max-w-7xl px-5 sm:px-8 lg:px-10 relative">
+        <div class="reveal">
+          <div class="section-label">Certificates</div>
+          <h2 class="section-title mt-3 text-[color:var(--text)]">Credentials that back up the skill set.</h2>
+        </div>
+        <div class="mt-10 grid sm:grid-cols-2 gap-5">
+          <div class="reveal glass rounded-[1.8rem] p-7 smooth flex items-start justify-between gap-6 flex-wrap">
+            <div>
+              <div class="inline-flex pill px-3 py-1 rounded-full text-xs font-semibold mb-3">Java Associate Professional</div>
+              <div class="text-xl font-bold text-[color:var(--text)]">JAP-81-57 Certification</div>
+              <div class="mt-1 text-[color:var(--muted)] text-sm">Verified certification covering core Java programming fundamentals and object-oriented concepts.</div>
+            </div>
+            <div class="flex flex-col gap-2 w-full sm:w-auto">
+              <a href="Devika%20Dhanyakumar%20Mane-%20JAP-81-57.pdf" target="_blank" rel="noreferrer" class="btn-primary px-5 py-2.5 rounded-full text-sm font-semibold text-center transition-transform duration-300">View Certificate</a>
+              <a href="Devika%20Dhanyakumar%20Mane-%20JAP-81-57.pdf" download class="btn-secondary px-5 py-2.5 rounded-full text-sm font-semibold text-center hover:-translate-y-1 transition-transform duration-300">Download PDF</a>
             </div>
           </div>
         </div>
@@ -482,7 +619,7 @@
               </div>
               <input id="formSubject" class="form-field" placeholder="Subject" required type="text" />
               <textarea id="formMessage" rows="6" class="form-field" placeholder="Your Message" required></textarea>
-              <button id="formSubmit" type="submit" class="btn-primary py-4 rounded-xl font-semibold hover:-translate-y-1 transition-transform w-full">Send Message</button>
+              <button id="formSubmit" type="submit" class="btn-primary py-4 rounded-xl font-semibold transition-transform duration-300 w-full">Send Message</button>
             </form>
           </div>
         </div>
@@ -519,8 +656,9 @@
       <h3 class="text-2xl font-bold mb-4 text-[color:var(--text)]">Devika's Resume</h3>
       <p class="text-[color:var(--muted)] mb-6 text-sm">Download the resume file directly to your system or preview it in your browser.</p>
       <div class="flex flex-col gap-3">
-        <a href="mailto:devikadhanyakumarmane@gmail.com" class="btn-primary py-3 rounded-xl font-semibold transition-transform">Request Resume PDF</a>
-        <button id="modalCloseBtn" class="btn-secondary py-3 rounded-xl font-semibold">Close</button>
+        <a href="devika_java_2026.pdf" target="_blank" rel="noreferrer" class="btn-primary py-3 rounded-xl font-semibold transition-transform">Preview Resume</a>
+        <a href="devika_java_2026.pdf" download class="btn-secondary py-3 rounded-xl font-semibold transition-transform hover:-translate-y-1">Download PDF</a>
+        <button id="modalCloseBtn" class="btn-secondary py-3 rounded-xl font-semibold hover:-translate-y-1 transition-transform">Close</button>
       </div>
     </div>
   </div>
@@ -528,6 +666,35 @@
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+      const prefersReducedMotion = window.matchMedia('(prefers-reduce-motion: reduce), (prefers-reduced-motion: reduce)').matches;
+      let updateCanvasColors = function () {}; 
+
+      // --- SPACE-THEMED AMBIENT DECOR: twinkling stars ONLY (No shooting stars) ---
+      (function populateStarField() {
+        if (prefersReducedMotion) return;
+        const field = document.getElementById('starField');
+        const frag = document.createDocumentFragment();
+
+        const starCount = window.innerWidth < 640 ? 30 : 55;
+        for (let i = 0; i < starCount; i++) {
+          const s = document.createElement('div');
+          s.className = 'twinkle';
+          const size = (Math.random() * 1.6 + 0.6).toFixed(2);
+          s.style.width = size + 'px';
+          s.style.height = size + 'px';
+          s.style.top = (Math.random() * 100).toFixed(2) + '%';
+          s.style.left = (Math.random() * 100).toFixed(2) + '%';
+          s.style.setProperty('--tdur', (Math.random() * 3 + 2.5).toFixed(2) + 's');
+          s.style.setProperty('--tdelay', (Math.random() * 4).toFixed(2) + 's');
+          s.style.setProperty('--tmin', (Math.random() * 0.15 + 0.05).toFixed(2));
+          s.style.setProperty('--tmax', (Math.random() * 0.4 + 0.5).toFixed(2));
+          frag.appendChild(s);
+        }
+        
+        // Removed shooting stars logic to optimize performance and adhere to instructions
+        field.appendChild(frag);
+      })();
 
       // --- SMART PRELOADER ---
       const preloader = document.getElementById('preloader');
@@ -576,12 +743,15 @@
         startIntroTimeline();
       }
 
-      // --- 100% NATIVE CSS REVEALS (0 GSAP overhead on scroll) ---
+      // --- DYNAMIC STAGGERED REVEALS (Extremely performant CSS triggering) ---
       const revealObserver = new IntersectionObserver((entries, observer) => {
+        let delay = 0;
         entries.forEach(entry => {
           if (entry.isIntersecting) {
+            entry.target.style.transitionDelay = `${delay}s`;
             entry.target.classList.add('visible');
             observer.unobserve(entry.target); 
+            delay += 0.12; // Creates the dynamic buttery-smooth staggered animation
           }
         });
       }, { root: null, rootMargin: "0px 0px -10% 0px", threshold: 0.1 });
@@ -619,10 +789,17 @@
 
       // --- ULTRA HIGH PERFORMANCE HTML5 CANVAS 2D ---
       const canvas = document.getElementById('bg-canvas');
+
+      if (prefersReducedMotion) {
+        canvas.style.display = 'none';
+      } else {
+
       const ctx = canvas.getContext('2d', { alpha: true });
       let width, height;
       let particles = [];
-      const particleCount = 40; // Slightly reduced
+      const particleCount = window.innerWidth < 640 ? 18 : (window.innerWidth < 1024 ? 28 : 40);
+      const connectionDistSq = window.innerWidth < 640 ? 9000 : 18000;
+      let canvasActive = true; 
 
       function resizeCanvas() {
         width = window.innerWidth;
@@ -633,11 +810,16 @@
       window.addEventListener('resize', resizeCanvas);
       resizeCanvas();
 
+      document.addEventListener('visibilitychange', () => {
+        canvasActive = !document.hidden;
+        if (canvasActive) requestAnimationFrame(animateCanvas);
+      });
+
       class Particle {
         constructor() {
           this.x = Math.random() * width;
           this.y = Math.random() * height;
-          this.vx = (Math.random() - 0.5) * 0.6; // Slightly slower
+          this.vx = (Math.random() - 0.5) * 0.6; 
           this.vy = (Math.random() - 0.5) * 0.6;
         }
         update() {
@@ -655,17 +837,16 @@
       let particleColor = '';
       let lineColor = '';
 
-      function updateCanvasColors() {
+      updateCanvasColors = function () {
         const style = getComputedStyle(document.documentElement);
         particleColor = style.getPropertyValue('--particle').trim();
         lineColor = style.getPropertyValue('--particle-line').trim();
-      }
+      };
       updateCanvasColors();
 
       function animateCanvas() {
         ctx.clearRect(0, 0, width, height);
         
-        // Draw lines
         ctx.lineWidth = 0.5;
         ctx.strokeStyle = lineColor;
         ctx.beginPath();
@@ -675,8 +856,7 @@
             const dy = particles[i].y - particles[j].y;
             const dist = dx * dx + dy * dy;
             
-            // Reduced connection distance for fewer lines (better performance)
-            if (dist < 18000) {
+            if (dist < connectionDistSq) {
               ctx.moveTo(particles[i].x, particles[i].y);
               ctx.lineTo(particles[j].x, particles[j].y);
             }
@@ -684,16 +864,17 @@
         }
         ctx.stroke();
 
-        // Draw dots as Rectangles (ctx.fillRect is dramatically faster than ctx.arc on bad GPUs)
         ctx.fillStyle = particleColor;
         for (let i = 0; i < particleCount; i++) {
           particles[i].update();
           ctx.fillRect(particles[i].x - 1.5, particles[i].y - 1.5, 3, 3);
         }
 
-        requestAnimationFrame(animateCanvas);
+        if (canvasActive) requestAnimationFrame(animateCanvas);
       }
       animateCanvas();
+
+      } 
 
       // --- MOBILE MENU FUNCTIONALITY ---
       const menuBtn = document.getElementById('menuBtn');
